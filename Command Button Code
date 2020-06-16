@@ -1,0 +1,24 @@
+Private Sub CommandButton1_Click()
+
+Call cellcount
+
+End Sub
+
+Private Sub CommandButton2_Click()
+
+'This script loops through the game of life program 30 times. If you want to increase the number of times change the number 30.
+
+For i = 0 To 30
+
+'The code for this script is stored in Module 1. Click it to veiw the code stored as livecelldetect()
+
+Call livecelldetect
+
+'The wait function allows you to pause the script for a set ammount of time. You can either have it work at a set time (IE 11:00am if you want to
+'Execute it then, or you can write Now() + the value you want it to 'wait'. I chose 1 second as it is the minimum.
+'This function had to be used because excel does not refresh the screen properly if you do not use it.
+
+Application.Wait (Now() + TimeValue("00:00:01"))
+Next
+
+End Sub
