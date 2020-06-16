@@ -1,0 +1,7 @@
+Draw a grid from B2 to Z26 in what color you choose. I chose red for contrast. Then draw green on the cells you want to observe the chang from conways game!
+
+Set up your command button 1 and command button 2, and assign their respective scripts to them.
+
+Create a new module and copy the code for conways game of life.
+
+Enjoy!
