@@ -1,0 +1,165 @@
+Sub cellcount()
+
+' A: Here is the first code I developed for this problem. It looks at each cell surrounding it and sees if it has a color index of 4 (red)
+'If the color index is indeed 4 it will log it into a number variable called cell count. It loops through all cells surrounding itself
+'And includes itself as part of the count. This part is critical to understand why the steps are a little different.
+
+Dim cellcount As Integer
+cellcount = 0
+Dim i As Integer
+Dim j As Integer
+
+For i = -1 To 1
+    For j = -1 To 1
+    If ActiveCell.Offset(i, j).Interior.ColorIndex = 4 Then
+        cellcount = cellcount + 1
+    End If
+    Next j
+Next i
+
+MsgBox "cellcount is " & cellcount
+
+End Sub
+Sub livecelldetect()
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+'' Daniel Levenson - 2020                                     ''
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+Dim livecell As Range
+Dim rcolored As Range
+Dim rcolor As Long
+Dim targetcolor As Boolean
+Dim cellfield As Range
+Dim cellcountsum As String
+Dim cellstrum As String
+Dim conarr() As String
+
+'The cell field is the area in which excel will do all the calculation work. To expand where this happens this has to be modified.
+'I used an arbitrary area of B2:Z26. The only caveat is that it is important that it does not hit the edge (Not in the first row or first column)
+'This is because when excel looks at every cell around it, the cell won't exist and will cause an error.
+
+Set cellfield = Range("B2:Z26")
+Dim count As Integer
+
+Dim Testone As String
+
+'Set rcolor to green colorindex
+rcolor = 4
+
+Dim i As Integer
+Dim j As Integer
+Dim cellcount As Integer
+Dim incelcount As Integer
+'cellcount = 0
+
+Set rcolored = Nothing
+
+'The program first calculates the number of every single cell in a given area. To do this every cell will be selected.
+'This shuts it off so you don't watch it get selected to improve the speed.
+
+Application.ScreenUpdating = False
+
+For Each livecell In cellfield
+    
+    'Each cell is selected, and this is why the screen updating needs to be turned off. It slows calculating time to watch it happen.
+    
+    Range(livecell.Address(0, 0)).Select
+    
+    For i = -1 To 1
+        
+        For j = -1 To 1
+        
+            If ActiveCell.Offset(i, j).Interior.ColorIndex = rcolor Then
+                
+                cellcount = cellcount + 1
+            
+            End If
+            
+        Next j
+        
+    Next i
+
+cellcountsum = cellcountsum & " " & CStr(cellcount)
+                        
+    'This is where the program checks to see if each of these cells followed the rules. A dead cell should only come alive when it has 3 live
+    'Neighbours, and a live cell should die unless it has 3 or two neighbours. Because the program counts the cell itself for the 'live'
+    'Or green cells, we simply have to add one to each of those numbers. A dead cell won't count as it is not green and so the number
+    'Remains 3.
+
+    If livecell.Interior.ColorIndex = rcolor Then
+        
+        'This looks at the rules for cells that are colored. Remember rcolor = 4, thus its just looking at if the cell is green.
+        'I did that so that you can change all the colors super quickly. I know I did not do it with the background, but it is easy
+        'To do.
+        
+        If cellcount = 3 Then
+            targetcolor = True
+        ElseIf cellcount = 4 Then
+            targetcolor = True
+        Else
+            targetcolor = False
+        End If
+        
+        'Check if the cell is colorindex 3 - red
+    ElseIf livecell.Interior.ColorIndex = 3 Then
+        
+        If cellcount = 3 Then
+            targetcolor = True
+        Else
+            targetcolor = False
+        End If
+
+    End If
+
+'Every time a cell is checked, it changes a boolean variable to false if the cell dies or true if the cell lives.
+'This feature will allow us to store only the cells that live
+
+'The cell count needs to be swapped back to 0 or it will continue to add to whatever number was stored in it.
+'For example if the first cell had one green neighbour, and the second had one as well then the cell count would show as two
+'In the next iteration.
+
+cellcount = 0
+
+'If the cell lives then it is stored in a text string with the cells address. So if you have 3 cells that are alive for example (C3, C4, C5)
+'Then cellstrum = 0*C3*C4*C5 Unfortunately the first number always is stored as 0, but the following is a work around.
+
+If targetcolor = True Then
+    cellstrum = cellstrum & "*" & livecell.Address(0, 0)
+End If
+
+Next
+
+'Once you are out of the loop where you have figured out all of the cells that live or die, it is then important to change those cells to either
+'live or dead. The split(Variable, "symbol") function allows to you split a string by a symbol of your choice and store it in an array.
+'As in the previous example if you had cellstrum = 0*C3*C4*C5 this function splits it into Conarr(0, C3, C4, C5)
+'Where conarr(0) = 0, Conarr(1) = C3 and so on.
+
+conarr() = Split(cellstrum, "*")
+
+'This will wipe the whole screen and make it red again, so we can then redraw all the live cells back onto the cellfield that were stored in
+'The array.
+
+Range("B2:Z26").Interior.ColorIndex = 3
+
+'At this point it is okay to turn back screen updating so we can see the results of all the calculations
+
+Application.ScreenUpdating = True
+
+'This then goes through every element in that array and changes the cell color. UBound(array) returns the number of elements in the array.
+'So if there are 4 elements in the connarr - UBound(conarr) = 4. The statement becomes for i = 1 to 4.
+
+For i = 1 To UBound(conarr)
+    
+    Range(conarr(i)).Interior.ColorIndex = 4
+
+Next i
+
+'MsgBox cellcountsum
+
+'This simply empties all the range variables. I am not 100% sure if this is needed now, but the algorithm works fine with it.
+
+Set livecell = Nothing
+Set rcolored = Nothing
+
+End Sub
